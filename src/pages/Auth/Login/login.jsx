@@ -6,8 +6,8 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 import "../auth.css";
-import { loginService } from "services/";
-import { useAuth } from "contexts/";
+import { loginService } from "../../../services";
+import { useAuth } from "../../../context";
 
 const Login = () => {
 

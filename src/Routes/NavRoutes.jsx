@@ -1,4 +1,4 @@
-import { Trash, Home, Labels, Archive, Profile, Login, Signup } from "pages";
+import { Trash, Home, Labels, Archive, Profile, Login, Signup } from "./../pages";
 import Mockman from "mockman-js";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { PrivateRoutes } from "./PrivateRoutes";
