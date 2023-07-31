@@ -23,7 +23,9 @@
     --secondary-color: #256ae5;
     --secondary-bg-color: #a9c8ff;
     --secondary-active-color: #0050db;
-
+    
+    --navbar-min-height: 64px;
+    --grid-min-height: calc(100vh - var(--navbar-min-height));
 }
 
 
