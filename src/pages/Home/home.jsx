@@ -1,3 +1,4 @@
+import { NotesList } from "../../components"
 import { useNotes } from "../../context"
 
 const Home = () => {
