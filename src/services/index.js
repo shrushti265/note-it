@@ -1,6 +1,6 @@
-export { signupService } from './signupService';
-export { getNotesService } from './getNotesServices';
-export { postNoteService } from './postNotesServices';
-export { deleteNotesService } from './deleteNotesService';
-export { editNotesService } from './editNotesServices';
-export { loginService } from "./loginService"
+export { signupService } from './authServices/signupService';
+export { getNotesService } from './noteServices/getNotesServices';
+export { postNoteService } from './noteServices/postNotesServices';
+export { deleteNotesService } from './noteServices/deleteNotesService';
+export { editNotesService } from './noteServices/editNotesServices';
+export { loginService } from "./authServices/loginService"

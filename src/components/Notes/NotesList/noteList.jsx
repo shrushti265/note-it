@@ -1,11 +1,11 @@
-import "notes.css"
-import {NotesItem} from "../NoteItem"
+import "../notes.css"
+import {NoteItem} from "../../../components"
 
 const NotesList = ({notes}) => {
     return (
         <article className="notes-container flex-col flex-align-center flex-justify-start mx-auto">
             {
-                notes.map(notes => <NotesItem key={notes._id} note={note}/>)
+                notes.map(notes => <NoteItem key={notes._id} note={notes}/>)
             }
         </article>
     )

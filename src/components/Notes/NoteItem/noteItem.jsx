@@ -11,6 +11,7 @@ import { useState } from "react";
 import {useAuth, useNotes} from "../../../context"
 import { deleteNotesService } from "../../../services";
 import { toast } from "react-toastify";
+import { ColorPalette} from "../../../components"
 
 const NoteItem = ({note: {_id, noteTitle, noteBody, noteCreatedOn }}) => {
     const [showOptions, setShowOptions] = useState({});
@@ -129,3 +130,5 @@ const NoteItem = ({note: {_id, noteTitle, noteBody, noteCreatedOn }}) => {
         </div>
     )
 }
+
+export {NoteItem}

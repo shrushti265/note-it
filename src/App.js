@@ -1,16 +1,14 @@
 import { NavRoutes } from "./Routes/NavRoutes";
-import { Navbar } from "./components";
-import {Sidebar} from "./components"
+import { Navbar, NewNoteModal } from "./components";
 import { useAuth } from "./context";
 
 const App = () => {
-
-    const {authState : {isAuth} } = useAuth()
+    
     return (
         <div className="App">
             <Navbar />
+            <NewNoteModal/>
             <NavRoutes />
-            <Sidebar />
         </div>
     )
 }
