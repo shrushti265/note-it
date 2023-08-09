@@ -6,14 +6,17 @@ import {
 	Archive,
 	Delete,
 	Palette,
+    Unarchive
 } from "@mui/icons-material";
 import { useState } from "react";
 import {useAuth, useNotes} from "../../../context"
-import { deleteNotesService } from "../../../services";
+import { deleteNotesService, postArchiveService, postUnarchiveService, deleteArchivedNoteService } from "../../../services";
 import { toast } from "react-toastify";
 import { ColorPalette} from "../../../components"
 
-const NoteItem = ({note: {_id, noteTitle, noteBody, noteCreatedOn }}) => {
+const NoteItem = ({note}) => {
+
+    const {_id, noteTitle, noteBody, noteCreatedOn, isArchived } = note;
     const [showOptions, setShowOptions] = useState({});
 
     const [pinned, setPinned] = useState(false);
@@ -47,7 +50,55 @@ const NoteItem = ({note: {_id, noteTitle, noteBody, noteCreatedOn }}) => {
         }
     }
 
+    const handleDeleteArchivedNote = async () => {
+        try {
+			const { data: { archives } } = await deleteArchivedNoteService(_id, authToken);
+			notesDispatch({
+				action: {
+					type: "EDIT_ARCHIVES",
+					payload: {
+						archives,
+						showNewNote: false,
+                        isEditing: null,
+                        editingNoteId: -1
+					},
+				},
+			});
+
+			toast("Note deleted.", "success");
+		} catch (error) {
+            console.log(error)
+			toast(
+				"Could note delete note. Try again after sometime!",
+				"error"
+			);
+         }
+
+    const handleArchiveNote = async () => {
+        try {
+            const  { data: { notes, archives } } = isArchived ? 
+            await postUnarchiveService(note, authToken) : 
+            await postArchiveService(note, authToken);
+
+            toast(isArchived ? 'Note unarchived' : 'Note archived', 'success');
+            notesDispatch({
+				action: {
+					type: "SET_ARCHIVES",
+					payload: {
+						notes,
+						archives
+					},
+				},
+			});
+        }
+        catch(error) {
+                toast(isArchived ? 'Note could not be unarchived. Try again later' : 'Note could not be archived. Try again later', 'error');
+            }
+        }
+    }
+
     const handleDeleteNote = async () => {
+        if(isArchived) return handleDeleteArchivedNote();
         try {
             const {data} = await deleteNotesService(_id, authToken);
             notesDispatch({
@@ -73,6 +124,7 @@ const NoteItem = ({note: {_id, noteTitle, noteBody, noteCreatedOn }}) => {
     }
 
     const pinIcon = pinned ? <PushPin /> : <PushPinOutlined/>
+    const archiveIcon = isArchived ? <Unarchive/> : <Archive/>
 
     return (
         <div className={`note note-card p-1 flex-align-start flex-justify-between`}>
@@ -112,9 +164,9 @@ const NoteItem = ({note: {_id, noteTitle, noteBody, noteCreatedOn }}) => {
 						</button>
 						{showColorPalette && <ColorPalette />}
 					</div>
-					<button className="btn btn-icon btn-note-action">
+					<button className="btn btn-icon btn-note-action" onClick={handleArchiveNote} >
 						<span className="icon mui-icon icon-edit">
-							{<Archive />}
+							{archiveIcon}
 						</span>
 					</button>
 					<button

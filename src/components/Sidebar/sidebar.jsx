@@ -66,7 +66,7 @@ const Sidebar = () => {
     notesDispatch({
       action: {
         type: "SHOW_NEW_NOTE_FORM",
-        payload: { showNewNoteForm: true, isEditing: false, editingNoteId: -1 },
+        payload: { showNewNoteForm: true, isEditing: null, editingNoteId: -1 },
       },
     });
   };

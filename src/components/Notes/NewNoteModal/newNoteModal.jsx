@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth, useNotes } from "../../../context";
 import { PushPin, PushPinOutlined } from "@mui/icons-material";
 import "./newNoteModal.css"
 import TextareaAutosize from "react-textarea-autosize";
-import { editNotesService } from "../../../services";
+import { editNotesService, editArchiveService, postNoteService } from "../../../services";
 import { toast } from "react-toastify";
+import {getCreatedDate} from "utils/getCreatedDate"
 
 const NewNoteModal = () => {
     const {
@@ -15,6 +16,7 @@ const NewNoteModal = () => {
 		handleShowSidebar,
 		isEditing,
 		editingNoteId,
+        archives
     } = useNotes();
     const {authToken} = useAuth()
 
@@ -26,6 +28,13 @@ const NewNoteModal = () => {
     const [noteItem, setNoteItem] = useState(initialEmptyFormState)
     const [formDataError, setFormDataError] = useState(null)
     const [pinned, setPinned] = useState(false)
+
+    useEffect(() => {
+        if(isEditing === "note")
+            setNoteItem(notes.find((note) => note._id === editingNoteId));
+        if(isEditing === "archive")
+            setNoteItem(archives.find((archive) => archive._id === editingNoteId))
+    }, [isEditing])
 
     const handleAddNotes = async (event) => {
         event.preventDefault();
@@ -59,7 +68,7 @@ const NewNoteModal = () => {
 				type: "SHOW_NEW_NOTE_FORM",
 				payload: {
 					showNewNoteForm: false,
-					isEditing: false,
+					isEditing: null,
 					editingNoteId: -1,
 				},
 			},
@@ -80,7 +89,7 @@ const NewNoteModal = () => {
                         notesLoading: false,
 						notesError: null,
 						showNewNoteForm: false,
-						isEditing: false,
+						isEditing: null,
 						editingNoteId: -1,
                     }
                 }
@@ -94,7 +103,7 @@ const NewNoteModal = () => {
                     payload: {
                         notesLoading: false,
 						showNewNoteForm: false,
-						isEditing: false,
+						isEditing: null,
 						editingNoteId: -1,
 						notesError:
 							"Could not create a new note. Please try again later.",
@@ -105,8 +114,32 @@ const NewNoteModal = () => {
         }
     }
 
-    const editedNotes = notes.find(({_id}) => _id === editingNoteId)
+    const handleEditArchived = async () => {
+        try {
+            const {data: {archives}} = await editArchiveService (noteItem, authToken)
+
+            notesDispatch({
+                action: {
+                    type: "EDIT_ARCHIVES",
+                    payload: {
+                        archives,
+                        showNewNoteForm: false,
+                        isEditing: null,
+                        editingNoteId: -1
+                    }
+                }
+            })
+            toast("Edited Note", "info");
+            resetNoteFormInput();
+        }catch (error){
+            toast("Failed to edit note. Please try again", "error")
+        }
+    }
+
     if (isEditing) {
+        if(noteItem.isArchived){
+            return handleEditArchived()
+        }
         return handleEditNote();
     }
     try {
@@ -114,7 +147,7 @@ const NewNoteModal = () => {
         const {
             data: { notes },
         } = postNoteService(
-            { ...noteItem, noteCreatedOn },
+            { ...noteItem, noteCreatedOn, isArchived: false },
             { authorization: authToken }
         );
 
@@ -126,7 +159,7 @@ const NewNoteModal = () => {
                     notesLoading: false,
                     notesError: null,
                     showNewNoteForm: false,
-                    isEditing: false,
+                    isEditing: null,
                     editingNoteId: -1,
                 },
             },
@@ -139,7 +172,7 @@ const NewNoteModal = () => {
                 type: "SET_NOTES_ERROR",
                 payload: {
                     showNewNoteForm: false,
-                    isEditing: false,
+                    isEditing: null,
                     editingNoteId: -1,
                     notesLoading: false,
                     notesError:

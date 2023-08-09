@@ -26,6 +26,46 @@ export const getAllArchivedNotesHandler = function (schema, request) {
 };
 
 /**
+ * This handler handles updates note from archive.
+ * send POST Request at /api/archives/:noteId
+ * body contains {note}
+ * */
+
+export const updateArchivedNotesHandler = function (schema, request) {
+  const user = requiresAuth.call(this, request);
+  try {
+    if (!user) {
+      return new Response(
+        404,
+        {},
+        {
+          errors: ["The email you entered is not Registered. Not Found error"],
+        }
+      );
+    }
+    const { archive } = JSON.parse(request.requestBody);
+    const { noteId } = request.params;
+    const archiveIndex = user.archives.findIndex(
+      (archive) => archive._id === noteId
+    );
+    user.archives[archiveIndex] = {
+      ...user.archives[archiveIndex],
+      ...archive,
+    };
+    this.db.users.update({ _id: user._id }, user);
+    return new Response(201, {}, { archives: user.archives });
+  } catch (error) {
+    return new Response(
+      500,
+      {},
+      {
+        error,
+      }
+    );
+  }
+};
+
+/**
  * This handler handles deletes note from archive.
  * send DELETE Request at /api/archives/delete/:noteId
  * */
