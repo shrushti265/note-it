@@ -1,11 +1,5 @@
-const actionTypes = {
-    SET_NOTES_SUCCESS: "SET_NOTES_SUCCESS",
-    SET_NOTES_ERROR: "SET_NOTES_ERROR",
-	RESET_NOTES: "RESET_NOTES",
-	SHOW_NEW_NOTE_FORM: "SHOW_NEW_NOTE_FORM",
-    SET_ARCHIVES: "SET_ARCHIVES",
-    EDIT_ARCHIVES: "EDIT_ARCHIVES"
-}
+import {v4 as uuid} from "uuid"
+import {notesAction as actionTypes } from "./actions"
 
 const initialNotesState = {
     notes: [],
@@ -29,7 +23,9 @@ const notesReducerFunction = (
                 showNewNoteForm,
                 isEditing,
                 editingNoteId,
-                archives
+                archives,
+                label, 
+                labelId
             },
         },
     }
@@ -78,6 +74,12 @@ const notesReducerFunction = (
                 editingNoteId,
                 showNewNoteForm
             }
+
+        case actionTypes.ADD_LABEL: 
+        return {
+            ...prevNotesState,
+            labels: [...prevNotesState.labels, { label, id:labelId}]
+        }
 
         default:
             return prevNotesState

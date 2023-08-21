@@ -6,22 +6,29 @@ import {
 	Archive,
 	Delete,
 	Palette,
-    Unarchive
+    Unarchive,
+    label
 } from "@mui/icons-material";
 import { useState } from "react";
 import {useAuth, useNotes} from "../../../context"
 import { deleteNotesService, postArchiveService, postUnarchiveService, deleteArchivedNoteService } from "../../../services";
 import { toast } from "react-toastify";
-import { ColorPalette} from "../../../components"
+import { ColorPalette, LabelOptions} from "../../../components"
+
 
 const NoteItem = ({note}) => {
 
     const {_id, noteTitle, noteBody, noteCreatedOn, isArchived } = note;
+
+    const initialShowOptions = {
+        showColorPalette: false,
+        showLabelOptions: false
+    }
     const [showOptions, setShowOptions] = useState({});
 
     const [pinned, setPinned] = useState(false);
 
-    const {showColorPalette} = showOptions;
+    const {showColorPalette, showLabelOptions} = showOptions;
 
     const {authToken} = useAuth()
     const {notesDispatch} = useNotes()
@@ -43,10 +50,15 @@ const NoteItem = ({note}) => {
         switch (option) {
             case "colorPalette":
                 setShowOptions((prevShowOptions) => ({
-                    ...prevShowOptions,
+                    ...initialShowOptions,
                     showColorPalette: !prevShowOptions.showColorPalette
                 }));
                 break;
+            case 'labelOptions' :
+                setShowOptions((prevShowOptions) => ({
+                    ...initialShowOptions,
+                    showLabelOptions: !prevShowOptions.showLabelOptions
+                }))
         }
     }
 
