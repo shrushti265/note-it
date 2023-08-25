@@ -11,20 +11,23 @@ import {
 } from "@mui/icons-material";
 import { useState } from "react";
 import {useAuth, useNotes} from "../../../context"
-import { deleteNotesService, postArchiveService, postUnarchiveService, deleteArchivedNoteService } from "../../../services";
+import { deleteNotesService, postArchiveService, postUnarchiveService, deleteArchiveNoteService } from "../../../services";
 import { toast } from "react-toastify";
 import { ColorPalette, LabelOptions} from "../../../components"
 
 
 const NoteItem = ({note}) => {
 
-    const {_id, noteTitle, noteBody, noteCreatedOn, isArchived } = note;
+    const {_id, noteTitle, noteBody, noteCreatedOn, isArchived, tags } = note;
 
     const initialShowOptions = {
         showColorPalette: false,
         showLabelOptions: false
     }
-    const [showOptions, setShowOptions] = useState({});
+    const [showOptions, setShowOptions] = useState({
+        showColorPalette: false,
+        showLabelOptions: false,
+    });
 
     const [pinned, setPinned] = useState(false);
 
@@ -64,7 +67,9 @@ const NoteItem = ({note}) => {
 
     const handleDeleteArchivedNote = async () => {
         try {
-			const { data: { archives } } = await deleteArchivedNoteService(_id, authToken);
+			const { 
+                data: { archives },
+            } = await deleteArchiveNoteService(_id, authToken);
 			notesDispatch({
 				action: {
 					type: "EDIT_ARCHIVES",
@@ -76,7 +81,6 @@ const NoteItem = ({note}) => {
 					},
 				},
 			});
-
 			toast("Note deleted.", "success");
 		} catch (error) {
             console.log(error)
@@ -84,13 +88,17 @@ const NoteItem = ({note}) => {
 				"Could note delete note. Try again after sometime!",
 				"error"
 			);
-         }
+        }
+    }
 
     const handleArchiveNote = async () => {
+        setIsOngoingCall(true);
         try {
-            const  { data: { notes, archives } } = isArchived ? 
-            await postUnarchiveService(note, authToken) : 
-            await postArchiveService(note, authToken);
+            const  { 
+                data: { notes, archives },
+             } = isArchived 
+             ? await postUnarchiveService(note, authToken) 
+             : await postArchiveService(note, authToken);
 
             toast(isArchived ? 'Note unarchived' : 'Note archived', 'success');
             notesDispatch({
@@ -102,12 +110,10 @@ const NoteItem = ({note}) => {
 					},
 				},
 			});
-        }
-        catch(error) {
+        }catch(error) {
                 toast(isArchived ? 'Note could not be unarchived. Try again later' : 'Note could not be archived. Try again later', 'error');
             }
-        }
-    }
+    };
 
     const handleDeleteNote = async () => {
         if(isArchived) return handleDeleteArchivedNote();
@@ -115,12 +121,12 @@ const NoteItem = ({note}) => {
             const {data} = await deleteNotesService(_id, authToken);
             notesDispatch({
                 action: {
-                    type: "SET_NOTES_SUCCESS",
+                    type: "SET_NOTES",
                     payload : {
                         notes: data.notes,
                         notesError: null,
                         notesLoading: false,
-                        showNewNotes: false,
+                        showNewNote: false,
                         isEditing: false,
                         editingNoteId: -1
                     }
@@ -135,8 +141,17 @@ const NoteItem = ({note}) => {
         }
     }
 
-    const pinIcon = pinned ? <PushPin /> : <PushPinOutlined/>
+    // const pinIcon = pinned ? <PushPin /> : <PushPinOutlined/>
     const archiveIcon = isArchived ? <Unarchive/> : <Archive/>
+    const mappedTags = tags.length > 0 && <div className="notes-tag-list flex-row flex-align-center flex-justify-start flex-wrap">
+        {
+            tags.map(({label, id}) => 
+            <span className="badge badge-primary py-0-25 px-0-5 text-sm" key={id}>
+                {label}
+            </span>
+            )
+        }
+    </div>
 
     return (
         <div className={`note note-card p-1 flex-align-start flex-justify-between`}>
@@ -151,7 +166,7 @@ const NoteItem = ({note}) => {
 				value={noteBody}
 				readOnly
 			/>
-            
+            {mappedTags}
 			<div className="note-info flex-row flex-align-center flex-justify-between">
 				<div className="note-timestamp text-sm gray-color">
 					Created on {noteCreatedOn}
@@ -176,7 +191,10 @@ const NoteItem = ({note}) => {
 						</button>
 						{showColorPalette && <ColorPalette />}
 					</div>
-					<button className="btn btn-icon btn-note-action" onClick={handleArchiveNote} >
+					<button 
+                        className="btn btn-icon btn-note-action" 
+                        onClick={handleArchiveNote} 
+                    >
 						<span className="icon mui-icon icon-edit">
 							{archiveIcon}
 						</span>

@@ -4,7 +4,7 @@ import "./label.css"
 
 const Labels = () => {
 
-    const {labels, } = useNotes();
+    const {labels, notes, archives} = useNotes();
 
     const labelledNotes = labels.map(({label, id}) => {
         const notesWithLabel = notes.reducer(

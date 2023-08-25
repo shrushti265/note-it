@@ -1,8 +1,9 @@
-import { NotesList } from "../../components"
+import { NotesList, SearchBar } from "../../components"
 import { useNotes } from "../../context"
+import {getFilteredAndSortedNotes} from "utils"
 
 const Home = () => {
-    const {notes, notesLoading, notesError} = useNotes()
+    const {notes, notesLoading, notesError, SearchText, FilterByLabel, sortBy} = useNotes()
 
     const loadingMessage = notesLoading && (
         <div className="message">
@@ -15,20 +16,22 @@ const Home = () => {
             <p className="error-color text-lg my-1">{notesError}</p>
         </div>
     )
+
+    const filteredAndSortedNotes = getFilteredAndSortedNotes(notes, SearchText, FilterByLabel, sortBy)
     return (
         <section className="section-wrapper flex-col flex-align-center flex-justify-center flex-justify-start">
-            {loadingMessage ? loadingMessage : (
-                <>
-                    {errorMessage}
+            notesStateLoading ? (
+                loadingMessage
+                ) : notesStateError ? (
+                    errorMessage 
+                ): (
+                    <>
+                    <SearchBar />
                     <div className="notes-list-wrapper">
-                        {notes.length ? (
-                            <NotesList notes={notes}/>
-                        ) : (
-                            <p className="text-lg text-center">You don't have any Notes!</p>
-                        ) }
+                        {filteredAndSortedNotes.length ? (<NotesList notes={filteredAndSortedNotes}/>) : (<p classname="text-lg text-center">You don't have any notes</p>)}
                     </div>
-                </>
-            )}
+                    </>
+                )
         </section>
     )
 }

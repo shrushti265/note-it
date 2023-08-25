@@ -3,9 +3,9 @@ import { useAuth, useNotes } from "../../../context";
 import { PushPin, PushPinOutlined } from "@mui/icons-material";
 import "./newNoteModal.css"
 import TextareaAutosize from "react-textarea-autosize";
-import { editNotesService, editArchiveService, postNoteService } from "../../../services";
+import { editNoteService, editArchiveService, postNoteService } from "../../../services";
 import { toast } from "react-toastify";
-import {getCreatedDate} from "../../../utils/getCreatedDate"
+import {getCreatedDate} from "../../../utils/getCreatedData"
 
 const NewNoteModal = () => {
     const {
@@ -79,7 +79,7 @@ const NewNoteModal = () => {
         try {
             const {
                 data : {notes},
-            } = await editNotesService (noteItem, authToken);
+            } = await editNoteService (noteItem, authToken);
 
             notesDispatch({
                 action: {

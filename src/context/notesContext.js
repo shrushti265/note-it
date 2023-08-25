@@ -1,41 +1,46 @@
 import { createContext, useContext, useEffect, useReducer, useState } from "react";
 import { initialNotesState, notesReducerFunction } from "../reducer";
 import { useAuth } from "./authContext";
-import { getNotesService } from "../services";
+import { getNotesService, getArchivedNotesService } from "../services";
 import { toast } from "react-toastify";
 
 const NotesContext = createContext(initialNotesState);
 
 const NotesProvider = ({ children }) => {
     const {isAuth} = useAuth();
+    const [searchText, setSearchText] = useState(" ")
 
     const fetchNotes = async (authToken) => {
         try {
             const {data : {notes}} = await getNotesService(authToken)
+            const {data: {archives}, } = await getArchivedNotesService(authToken)
+
             notesDispatch({
                 action: {
-                    type: "SET_NOTES_SUCCESS",
+                    type: "INIT_NOTES_STATE_SUCCESS",
                     payload: {
-                        notes,
-                        notesLoading: false,
-                        notesError: null,
+                        notes, 
+                        archives,
+                        notesStateLoading: false,
+                        notesStateError: null,
                         showNewNoteForm: false,
                         isEditing: null,
                         editingNoteId: -1,
-                    },
-                },
+                        labels: [],
+                    }
+                }
             })
         }
         catch (error) {
             notesDispatch({
                 action: {
-                    type: "SET_NOTES_ERROR",
+                    type: "INIT_NOTES_STATE_SUCCESS",
                     payload: {
-                        notesLoading: false,
-                        notesError: "Could not load notes. Try again later",
                         showNewNoteForm: false,
                         isEditing: null,
-                        editingNoteId: -1,               
+                        editingNoteId: -1,  
+                        notesStateError: "Couldn't load notes",
+                        notesStateLoading: false,            
                     },
                 },
             })
@@ -50,7 +55,22 @@ const NotesProvider = ({ children }) => {
         }
     }, [isAuth])
 
-    const [notesState, notesDispatch] = useReducer(notesReducerFunction, initialNotesState)
+    const [notesState, notesDispatch] = useReducer(notesReducerFunction, initialNotesState);
+
+    useEffect(() => {
+        const newFilterByLabels = notesState.labels.map(( {label, id} ) => {
+            const foundLabel = notesState.filterByLabels.find((filter) => filter.id === id);
+            return foundLabel ? foundLabel : {id, label, filtered: false};
+        });
+        notesDispatch ({
+            action: {
+                type: "FILTER_BY_LABELS",
+                payload: {
+                    filterByLabels: newFilterByLabels
+                }
+        }
+        })
+    }, [notesState.labels]);
 
     const [showSidebar, setShowSidebar] = useState(false)
 
@@ -58,8 +78,10 @@ const NotesProvider = ({ children }) => {
         setShowSidebar((prevShowSidebar) => !prevShowSidebar)
     }
 
+    const handleChangeSearchText = (event) => setSearchText(event.target.value);
+
     return (
-        <NotesContext.Provider value={{ ...notesState, showSidebar, handleShowSidebar, notesDispatch}}>
+        <NotesContext.Provider value={{ ...notesState, showSidebar, handleShowSidebar, notesDispatch, searchText, handleChangeSearchText}}>
                 {children}
         </NotesContext.Provider>
     )  

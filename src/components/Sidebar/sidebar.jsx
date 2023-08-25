@@ -1,10 +1,18 @@
-import { Logout, Close, Add } from "@mui/icons-material/";
+import { 
+  HomeOutlined,
+	LabelOutlined,
+	ArchiveOutlined,
+	DeleteOutlineOutlined,
+	AccountCircleOutlined,
+  Logout, 
+  Close, 
+  Add 
+} from "@mui/icons-material/";
 import { v4 as uuid } from "uuid";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import "./sidebar.css";
 import { useAuth, useNotes } from "../../context";
-import { sidebarSections } from "./sidebar-sections";
 import { useState } from "react";
 
 const Sidebar = () => {
@@ -12,6 +20,39 @@ const Sidebar = () => {
   const Navigate = useNavigate();
   const { authDispatch, authUser, isAuth } = useAuth();
   const { notesDispatch, showSidebar, handleShowSidebar, labels } = useNotes();
+
+  const sidebarSections = [
+		{
+			key: uuid(),
+			icon: <HomeOutlined />,
+			name: "Home",
+			path: "/",
+		},
+		{
+			key: uuid(),
+			icon: <LabelOutlined />,
+			name: "Labels",
+			path: "/labels",
+		},
+		{
+			key: uuid(),
+			icon: <ArchiveOutlined />,
+			name: "Archive",
+			path: "/archive",
+		},
+		{
+			key: uuid(),
+			icon: <DeleteOutlineOutlined />,
+			name: "Trash",
+			path: "trash",
+		},
+		{
+			key: uuid(),
+			icon: <AccountCircleOutlined />,
+			name: "Profile",
+			path: "profile",
+		},
+	];
 
   const labelMapping = labels.length > 0 && (
     <ul className="list list-spaced mt-0-5 list-style-none pl-2-5 list-labels flex-col align-center">
@@ -46,6 +87,10 @@ const Sidebar = () => {
       },
     });
   };
+
+  const handleAddNewLabel = () => {
+
+  }
 
   const handleLogout = () => {
     localStorage.removeItem("inscribe-token");

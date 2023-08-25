@@ -1,5 +1,5 @@
 import {v4 as uuid} from "uuid"
-import {notesAction as actionTypes } from "./actions"
+import {notesActions as actionTypes } from "./actions"
 
 const initialNotesState = {
     notes: [],

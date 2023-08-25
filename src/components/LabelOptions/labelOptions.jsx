@@ -1,13 +1,19 @@
 import {useState, useEffect} from "react";
 import { toast } from "react-toastify";
 import {v4 as uuid} from "uuid";
-import "labelOptions.css"
+import "./labelOptions.css";
+import { useAuth, useNotes } from "../../context";
+import { editArchiveService, editNoteService } from "../../services";
 
 const LabelOptions = ({note}) => {
 
-    const findIfLabelInNote = (id) => {
-        note.tags.find((tag) => tag.id === id) ? true : false
-    }
+    const {labels, notesDispatch} = useNotes();
+    const {authToken} = useAuth()
+    const [newLabel, setNewLabel] = useState("");
+
+    const findIfLabelInNote = (id) => 
+        note.tags.find((tag) => tag.id === id) ? true : false;
+    
 
     const [labelOptions, setLabelOptions] = useState(
         labels.map((label) => ({
@@ -15,8 +21,6 @@ const LabelOptions = ({note}) => {
             checked: findIfLabelInNote(label.id)
         }))
     )
-
-    const [newLabel, setNewLabel] = useState("");
 
     const getUpdatedNoteTags = (action, id, label) => {
         switch (action) {
@@ -53,7 +57,7 @@ const LabelOptions = ({note}) => {
             }else {
                 const {
                     data: {notes},
-                } = await editNotesService(updatedNote, authToken)
+                } = await editNoteService(updatedNote, authToken)
                 notesDispatch({
                     action: {
                         type: "SET_NOTES_SUCCESS",
