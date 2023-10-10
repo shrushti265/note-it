@@ -56,7 +56,7 @@ const Labels = () => {
 					)
 				)
 			) : (
-				<p>You have not created any labels!</p>
+				<p className="text-lg text-center">You have not created any labels!</p>
 			)}
 		</section>
 	);

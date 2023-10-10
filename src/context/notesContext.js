@@ -1,19 +1,22 @@
 import { createContext, useContext, useEffect, useReducer, useState } from "react";
 import { initialNotesState, notesReducerFunction } from "../reducer";
 import { useAuth } from "./authContext";
-import { getNotesService, getArchivedNotesService } from "../services";
+import { getNotesService, getArchivedNotesService, getTrashedNotesService } from "../services";
 import { toast } from "react-toastify";
+
 
 const NotesContext = createContext(initialNotesState);
 
 const NotesProvider = ({ children }) => {
     const {isAuth} = useAuth();
     const [searchText, setSearchText] = useState(" ")
+    const [showSidebar, setShowSidebar] = useState(false)
 
     const fetchNotes = async (authToken) => {
         try {
-            const {data : {notes}} = await getNotesService(authToken)
-            const {data: {archives}, } = await getArchivedNotesService(authToken)
+            const {data : {notes}} = await getNotesService(authToken);
+            const {data: {archives}} = await getArchivedNotesService(authToken);
+            const {data : {trash}} = await getTrashedNotesService(authToken)
 
             notesDispatch({
                 action: {
@@ -27,6 +30,7 @@ const NotesProvider = ({ children }) => {
                         isEditing: null,
                         editingNoteId: -1,
                         labels: [],
+                        trash,
                     }
                 }
             })
@@ -53,7 +57,7 @@ const NotesProvider = ({ children }) => {
         if(authToken || isAuth) {
             fetchNotes(authToken);
         }
-    }, [isAuth])
+    }, [isAuth]);
 
     const [notesState, notesDispatch] = useReducer(notesReducerFunction, initialNotesState);
 
@@ -72,8 +76,6 @@ const NotesProvider = ({ children }) => {
         })
     }, [notesState.labels]);
 
-    const [showSidebar, setShowSidebar] = useState(false)
-
     const handleShowSidebar = () => {
         setShowSidebar((prevShowSidebar) => !prevShowSidebar)
     }
@@ -88,5 +90,6 @@ const NotesProvider = ({ children }) => {
 }
 
 const useNotes = () => useContext(NotesContext)
+
 
 export {NotesProvider, useNotes} 

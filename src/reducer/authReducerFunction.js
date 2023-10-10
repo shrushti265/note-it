@@ -21,7 +21,7 @@ const authReducerFunction = (prevAuthState, { action: {type, payload:{isAuth, au
             return initialAuthState;
 
         default :
-        return initialAuthState;
+        throw new Error ('Invalid Dispatch action type!')
     }
   }
 export {authReducerFunction, initialAuthState}

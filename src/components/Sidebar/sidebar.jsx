@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import "./sidebar.css";
 import { useAuth, useNotes } from "../../context";
 import { useState } from "react";
+import { sidebarSections } from "./sidebar-sections"
 
 const Sidebar = () => {
   const [newLabel, setNewLabel] = useState("");

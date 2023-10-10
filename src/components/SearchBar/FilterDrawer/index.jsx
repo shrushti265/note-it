@@ -1,5 +1,5 @@
 import { Close } from "@mui/icons-material";
-import {useNotes} from "../../../context"
+import {useNotes} from "./../../../context"
 
 const FilterDrawer = ({handleChangeShowFilterModal}) => {
 

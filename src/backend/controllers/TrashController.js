@@ -14,7 +14,7 @@ import { requiresAuth } from "../utils/authUtils";
 export const getAllTrashNotesHandler = function (schema, request) {
   const user = requiresAuth.call(this, request);
   if (!user) {
-    new Response(
+    return  new Response(
       404,
       {},
       {
@@ -33,7 +33,7 @@ export const getAllTrashNotesHandler = function (schema, request) {
 export const deleteFromTrashHandler = function (schema, request) {
   const user = requiresAuth.call(this, request);
   if (!user) {
-    new Response(
+   return new Response(
       404,
       {},
       {
@@ -54,8 +54,9 @@ export const deleteFromTrashHandler = function (schema, request) {
 
 export const restoreFromTrashHandler = function (schema, request) {
   const user = requiresAuth.call(this, request);
+  try {
   if (!user) {
-    new Response(
+    return new Response(
       404,
       {},
       {
@@ -64,9 +65,23 @@ export const restoreFromTrashHandler = function (schema, request) {
     );
   }
   const { noteId } = request.params;
-  const restoredNote = user.trash.filter((note) => note._id === noteId)[0];
-  user.trash = user.trash.filter((note) => note._id !== noteId);
-  user.notes.push({ ...restoredNote });
+  const noteToBeRestored = user.trash.find(note => note._id === noteId);
+  if(noteToBeRestored.isArchived){
+    user.archives.push({...noteToBeRestored})
+  }
+  else{
+    user.notes.push({...noteToBeRestored});
+  }
+  user.trash = user.trash.filter(note => note._id !== noteId);
   this.db.users.update({ _id: user._id }, user);
-  return new Response(200, {}, { trash: user.trash, notes: user.notes });
+  return new Response (201, {}, {notes: user.notes, trash: user.trash, archives: user.archives})
+}catch (error){
+  return new Response (
+    500,
+    {},
+    {
+      error
+    }
+  )
+}
 };

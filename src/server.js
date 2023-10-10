@@ -3,6 +3,7 @@ import {
   deleteFromArchivesHandler,
   getAllArchivedNotesHandler,
   restoreFromArchivesHandler,
+  updateArchivedNotesHandler
 } from "./backend/controllers/ArchiveController";
 import {
   loginHandler,
@@ -67,6 +68,7 @@ export function makeServer({ environment = "development" } = {}) {
 
       // archive routes (private)
       this.get("/archives", getAllArchivedNotesHandler.bind(this));
+      this.post("archives/:noteId", updateArchivedNotesHandler.bind(this))
       this.post(
         "/archives/restore/:noteId",
         restoreFromArchivesHandler.bind(this)
