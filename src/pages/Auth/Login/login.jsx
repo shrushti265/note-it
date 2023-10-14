@@ -233,7 +233,7 @@ const Login = () => {
 				</section>
 			</div>
 			{authError && <p className="error-color text-lg">{authError}</p>}
-            {authLoading && <p className="success-color text-lg">Loading. Please wait...</p>}
+            {authLoading && <p className="success-color text-lg"> Logging in. Please wait...</p>}
 		</section>
 	);
 };

@@ -5,3 +5,4 @@ export { Trash } from './Trash/trash';
 export { Archive } from './Archive/archive';
 export { Login } from './Auth/Login/login';
 export { Signup } from './Auth/Signup/signup'; 
+export { NotFound } from './NotFound'; 
