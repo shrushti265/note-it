@@ -10,6 +10,7 @@ const Home = () => {
     SearchText,
     FilterByLabel,
     sortBy,
+    filterByPriority
   } = useNotes();
 
   const loadingMessage = (
@@ -28,6 +29,7 @@ const Home = () => {
     notes,
     SearchText,
     FilterByLabel,
+    filterByPriority,
     sortBy
   );
   return (

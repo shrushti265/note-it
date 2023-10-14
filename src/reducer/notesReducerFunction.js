@@ -1,16 +1,25 @@
 import { v4 as uuid } from "uuid";
 import { notesActions as actionTypes } from "./actions";
+// import {notePriorities} from "components/Notes/note-priorities"
 
 const initialNotesState = {
   notes: [],
   archives: [],
   Labels: [],
   trash: [],
-  notesLoading: true,
-  notesError: null,
+  notesStateLoading: true,
+  notesStateError: null,
   showNewNoteForm: false,
   isEditing: null,
+  sortBy: {sortByDate: '', sortByPriority: ''},
   editingNoteId: -1,
+  filterByLabels: [],
+  filterByPriority:
+  notePriorities.map(({ priorityId, priority }) => ({
+    id: priorityId,
+    priority,
+    filtered: false,
+  })),
 };
 
 const notesReducerFunction = (
@@ -20,8 +29,8 @@ const notesReducerFunction = (
       type,
       payload: {
         notes,
-        notesLoading,
-        notesError,
+        notesStateLoading,
+        notesStateError,
         showNewNoteForm,
         isEditing,
         editingNoteId,
@@ -32,6 +41,7 @@ const notesReducerFunction = (
         filterByLabel,
         sortBy,
         trash,
+        filterByPriority
       },
     },
   }
@@ -73,7 +83,7 @@ const notesReducerFunction = (
     case actionTypes.RESET_NOTES:
       return initialNotesState;
 
-    case actionTypes.SHOW_NEW_NOTES_FORM:
+    case actionTypes.SHOW_NEW_NOTE_FORM:
       return {
         ...prevNotesState,
         isEditing,
@@ -95,7 +105,7 @@ const notesReducerFunction = (
         isEditing,
         editingNoteId,
         showNewNoteForm,
-        trash,
+        trash: (trash || prevNotesState.trash),
       };
 
     case actionTypes.ADD_LABEL:
@@ -120,6 +130,7 @@ const notesReducerFunction = (
         ...prevNotesState,
         filterByLabel,
         sortBy,
+        filterByPriority
       };
 
     case actionTypes.RESTORE_FROM_TRASH:
@@ -135,6 +146,12 @@ const notesReducerFunction = (
         ...prevNotesState,
         trash,
       };
+
+    case actionTypes.FILTER_BY_PRIORITY:
+      return {
+        ...prevNotesState,
+        filterByPriority
+      }  
 
     default:
       throw new Error("Invalid Dispatch action type!");

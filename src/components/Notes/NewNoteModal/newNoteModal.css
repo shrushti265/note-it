@@ -4,17 +4,32 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(161, 41, 41, 0.5);
     z-index: 3;
-}
+} 
 
 .new-note-form {
     max-width: 500px;
     max-height: 90vh;
     overflow: auto;
     /* width: 100%; */
+    height: max-content;
     gap: var(--space-0-5);
     position: relative;
+}
+
+.new-note-form .note-actions {
+    width: 100%;
+}
+
+.priority-dropdown {
+    outline: none;
+    background-color: inherit;
+    border-radius: var(--br-2);
+    -webkit-border-radius: var(--br-2);
+    -moz-border-radius: var(--br-2);
+    -ms-border-radius: var(--br-2);
+    -o-border-radius: var(--br-2);
 }
 
 .new-note-form .note-title,

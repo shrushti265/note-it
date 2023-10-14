@@ -1,12 +1,12 @@
-import { 
+import {
   HomeOutlined,
-	LabelOutlined,
-	ArchiveOutlined,
-	DeleteOutlineOutlined,
-	AccountCircleOutlined,
-  Logout, 
-  Close, 
-  Add 
+  LabelOutlined,
+  ArchiveOutlined,
+  DeleteOutlineOutlined,
+  AccountCircleOutlined,
+  Logout,
+  Close,
+  Add,
 } from "@mui/icons-material/";
 import { v4 as uuid } from "uuid";
 import { Link } from "react-router-dom";
@@ -14,46 +14,13 @@ import { useNavigate } from "react-router-dom";
 import "./sidebar.css";
 import { useAuth, useNotes } from "../../context";
 import { useState } from "react";
-import { sidebarSections } from "./sidebar-sections"
+import { sidebarSections } from "./sidebar-sections";
 
 const Sidebar = () => {
   const [newLabel, setNewLabel] = useState("");
   const Navigate = useNavigate();
   const { authDispatch, authUser, isAuth } = useAuth();
   const { notesDispatch, showSidebar, handleShowSidebar, labels } = useNotes();
-
-  const sidebarSections = [
-		{
-			key: uuid(),
-			icon: <HomeOutlined />,
-			name: "Home",
-			path: "/",
-		},
-		{
-			key: uuid(),
-			icon: <LabelOutlined />,
-			name: "Labels",
-			path: "/labels",
-		},
-		{
-			key: uuid(),
-			icon: <ArchiveOutlined />,
-			name: "Archive",
-			path: "/archive",
-		},
-		{
-			key: uuid(),
-			icon: <DeleteOutlineOutlined />,
-			name: "Trash",
-			path: "trash",
-		},
-		{
-			key: uuid(),
-			icon: <AccountCircleOutlined />,
-			name: "Profile",
-			path: "profile",
-		},
-	];
 
   const labelMapping = labels.length > 0 && (
     <ul className="list list-spaced mt-0-5 list-style-none pl-2-5 list-labels flex-col align-center">
@@ -89,9 +56,16 @@ const Sidebar = () => {
     });
   };
 
-  const handleAddNewLabel = () => {
-
-  }
+  const handleAddNewLabel = (event) => {
+    event.preventDefault();
+    notesDispatch({
+      action: {
+        type: "ADD_LABEL",
+        payload: { label: newLabel, labelId: uuid() },
+      },
+    });
+    setNewLabel("");
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("inscribe-token");
@@ -114,6 +88,9 @@ const Sidebar = () => {
 
   if (!isAuth) return null;
 
+  const buttonDisabled =
+    notesStateLoading || (notesStateError && "btn-disabled");
+
   return (
     <aside className="idebar flex-col flex-justify-between">
       {showSidebar && (
@@ -135,11 +112,13 @@ const Sidebar = () => {
                 value={newLabel}
                 onChange={(e) => setNewLabel(e.target.value)}
                 placeholder="Enter new Label"
+                disabled={notesStateError || notesStateLoading}
                 required
               />
               <button
                 type="submit"
-                className="btn btn-icon- btn-primary btn-label-submit"
+                className={`btn btn-icon- btn-primary btn-label-submit ${buttonDisabled}`}
+                disabled={notesStateError || notesStateLoading}
               >
                 {<Add />}
               </button>
@@ -147,24 +126,26 @@ const Sidebar = () => {
           </form>
         </section>
         <button
-          className="btn btn-primary btn-new-note btn-full-width px-0-75 py-0-25 mt-1-5 text-reg"
+          className={`btn btn-primary btn-new-note btn-full-width px-0-75 py-0-25 mt-1-5 text-reg ${buttonDisabled}`}
           onClick={handleCreateNote}
+          disabled={notesStateError || notesStateLoading}
         >
           Create new note
         </button>
       </section>
-      <section className="sidebar-footer flex-row flex-align-center flex-justify-between flex-wrap">
+      {notesStateError && !notesStateLoading ? null : (
+        <section className="sidebar-footer flex-row flex-align-center flex-justify-between flex-wrap">
           <article className="user-info flex-row flex-align-center">
             <img></img>
-            <p className="user-name-text-sm">{authUser.firstName} {authUser.lastName}</p>
+            <p className="user-name-text-sm">
+              {authUser.firstName} {authUser.lastName}
+            </p>
           </article>
-          <button
-            className="btn btn-icon btn-logout"
-            onClick={handleLogout}
-          >
-            <Logout/>
+          <button className="btn btn-icon btn-logout" onClick={handleLogout}>
+            <Logout />
           </button>
-      </section>
+        </section>
+      )}
     </aside>
   );
 };

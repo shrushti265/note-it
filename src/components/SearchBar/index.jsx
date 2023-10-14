@@ -5,7 +5,9 @@ import { FilterDrawerPortal } from "./FilterDrawer/FilterDrawerPortal";
 
 const SearchBar = ({notetype}) => {
 
-    const {filterByLabel, notesDispatch, sortBy} = useNotes();
+    const { searchText, handleChangeSearchText, archives, notes, sortBy, filterByLabel, notesDispatch, filterByPriority} = useNotes();
+
+    const {sortByLabel, sortByPriority} = sortBy;
 
     const displayNotes = notetype === "archives" ? "archives" : "notes"
 
@@ -17,7 +19,8 @@ const SearchBar = ({notetype}) => {
                 setShowFilterModal(false);
                break;
             case "CLOSE_FILTER_MODAL":
-                setShowFilterModal(false)
+                setShowFilterModal(false);
+                break;
         }
     }
 
@@ -26,11 +29,15 @@ const SearchBar = ({notetype}) => {
             action:{
                 type: "RESET_FILTERS",
                 payload: {
-                    sortBy: "",
+                    sortBy: {sortByDate: "", sortByPriority: ''},
                     filterByLabel: filterByLabel.map((filter) => ({
                         ...filter,
-                        filtered: false
-                    }))
+                        filtered: false,
+                    })),
+                    filterByPriority: filterByPriority.map((filter) => ({
+                        ...filter,
+                        filtered: false,
+                    }) )
                 }
             }
         })
@@ -42,8 +49,8 @@ const SearchBar = ({notetype}) => {
                     type="section"
                     className="input-search-note text-lg"
                     placeholder="Enter Search Text"
-                    // onChange={handleChangeSearchText}
-                    // value={searchText}
+                    onChange={handleChangeSearchText}
+                    value={searchText}
                 />
                 {displayNotes.length > 0 && (
                     <button     
@@ -59,15 +66,22 @@ const SearchBar = ({notetype}) => {
             {showFilterModal && <FilterDrawerPortal handleChangeShowFilterModal={handleChangeShowFilterModal}/>}
             <div className="text-clear-button-wrapper flex-row flex-justify-between flex-align-start mx-auto mt-1">
                 <div className="sort-filter-text">
-                    {sortBy && (<p className="sort-options-text">Sort by- {sortBy}</p>)}
+                    {sortByLabel && (<p className="sort-options-text">Sort by- {sortByLabel}</p>)}
+                    {sortByPriority && (<p className="sort-options-text">Sort by- {sortByPriority}</p>)}
                     {filterByLabel.some((filter) => filter.filtered) && (
                     <div className="filter-options-text flex-row flex-row flex-align-center flex-justify-start">
-                        Filter by - {" "}
+                        Filter by Label-  
                         {filterByLabel.map(({id, label, filtered}) => filtered && <span key={id}>{label}</span>)}
                     </div>
                     )}
+                    {filterByPriority.some((filter) => filter.filtered) && (
+                        <div className="filter-options-text flex-row flex-row flex-align-center flex-justify-start">
+                            Filter by Priority-  
+                            {filterByPriority.map(({priority, filtered}) => filtered && <span key={id}>{priority}</span>)}
+                        </div>
+                    )}
                 </div>
-                {sortBy || filterByLabel.some((filter) => filter.filtered) ? (
+                {sortByPriority || sortByLabel || filterByLabel.some((filter) => filter.filtered) || filterByPriority.some((filter) => filter.filtered) ? (
                     <button
                         className="btn btn-secondary text-sm px-0-5 py-0-25"
                         onClick={handleClearFilters}

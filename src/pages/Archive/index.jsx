@@ -9,7 +9,8 @@ const Archive = () => {
     notesStateLoading, 
     searchText,
     sortBy,
-    filterByLabel 
+    filterByLabel,
+    filterByPriority, 
 } = useNotes();
     
 
@@ -22,13 +23,6 @@ const Archive = () => {
     <div className="message">
       <p className="error-color text-lg my-1">{notesStateError}</p>
     </div>
-  );
-
-  const filteredAndSortedArchives = getFilteredAndSortedNotes(
-    archives,
-    searchText,
-    filterByLabel,
-    sortBy
   );
 
   return (

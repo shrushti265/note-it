@@ -6,6 +6,9 @@ import TextareaAutosize from "react-textarea-autosize";
 import { editNoteService, editArchiveService, postNoteService } from "../../../services";
 import { toast } from "react-toastify";
 import {getCreatedDate} from "../../../utils/getCreatedData"
+import {Palette} from "@mui/icons-material"
+import { ColorPalette } from "components";
+import { notePriorities } from '../note-priorities';
 
 const NewNoteModal = () => {
     const {
@@ -16,33 +19,94 @@ const NewNoteModal = () => {
 		handleShowSidebar,
 		isEditing,
 		editingNoteId,
-        archives
+        archives,
+
     } = useNotes();
     const {authToken} = useAuth()
 
     const initialEmptyFormState = {
         noteTitle: "",
-        noteBody: ""
+        noteBody: "",
+        createdOn: "",
+        tags: [],
+        noteBackgroundColor: "var(--bg-card-color)",
+        isArchived: false,
+        notePriority: 'None'
     }
+    const initialShowOptions = { showColorPalette: false };
 
     const [noteItem, setNoteItem] = useState(initialEmptyFormState)
     const [formDataError, setFormDataError] = useState(null)
     const [pinned, setPinned] = useState(false)
+    const [showOptions, setShowOptions] = useState(initialShowOptions);
 
     useEffect(() => {
-        if(isEditing === "note")
-            setNoteItem(notes.find((note) => note._id === editingNoteId));
-        if(isEditing === "archive")
-            setNoteItem(archives.find((archive) => archive._id === editingNoteId))
+        if (isEditing === 'note') {
+            const noteToBeEdited = notes.find((note) => note._id === editingNoteId);
+			setNoteItem(noteToBeEdited);
+        }
+        if(isEditing === 'archive') {
+            const archiveToBeEdited = archives.find((archive) => archive._id === editingNoteId);
+			setNoteItem(archiveToBeEdited);
+        }
     }, [isEditing])
 
-    const handleAddNotes = async (event) => {
+    const handleAddNote = async (event) => {
         event.preventDefault();
         if(noteItem.noteTitle === '' || noteItem.noteBody === '')
         setFormDataError("Your note title and body cannot be empty");
         return;
     }
-    setFormDataError(null)
+    setFormDataError(null);
+
+    if (isEditing) {
+        if(noteItem.isArchived){
+            return handleEditArchived()
+        }
+        return handleEditNote();
+    }
+    try {
+        const noteCreatedOn = getCreatedDate();
+        const {
+            data: { notes },
+        } = postNoteService(
+            { ...noteItem, noteCreatedOn, isArchived: false },
+            { authorization: authToken }
+        );
+
+        notesDispatch({
+            action: {
+                type: "SET_NOTES_SUCCESS",
+                payload: {
+                    notes,
+                    notesLoading: false,
+                    notesError: null,
+                    showNewNoteForm: false,
+                    isEditing: null,
+                    editingNoteId: -1,
+                },
+            },
+        });
+        toast("Created new note.", "success");
+        resetNoteFormInput();
+    } catch (error) {
+        notesDispatch({
+            action: {
+                type: "SET_NOTES_ERROR",
+                payload: {
+                    showNewNoteForm: false,
+                    isEditing: null,
+                    editingNoteId: -1,
+                    notesLoading: false,
+                    notesError:
+                        "Could not create a new note. Please try again later.",
+                },
+            },
+        });
+        toast(
+            "Failed to create new note. please try again later.",
+            "error"
+        );
 
     const handlePinnedState = () => {
         setPinned((prevPinnedState) => !prevPinnedState)
@@ -59,6 +123,7 @@ const NewNoteModal = () => {
         if (showSidebar) handleShowSidebar()
         setNoteItem(initialEmptyFormState);
         setFormDataError(null)
+        setShowOptions(initialShowOptions);
     }
 
     const handleCancelNewNote = () => {
@@ -136,66 +201,30 @@ const NewNoteModal = () => {
         }
     }
 
-    if (isEditing) {
-        if(noteItem.isArchived){
-            return handleEditArchived()
-        }
-        return handleEditNote();
-    }
-    try {
-        const noteCreatedOn = getCreatedDate();
-        const {
-            data: { notes },
-        } = postNoteService(
-            { ...noteItem, noteCreatedOn, isArchived: false },
-            { authorization: authToken }
-        );
+    const handleChangeOptions = (option) => {
+		switch (option) {
+			case "colorPalette":
+				setShowOptions((prevShowOptions) => ({
+					...initialShowOptions,
+					showColorPalette: !prevShowOptions.showColorPalette,
+				}));
+				break;
+		}
+	};
 
-        notesDispatch({
-            action: {
-                type: "SET_NOTES_SUCCESS",
-                payload: {
-                    notes,
-                    notesLoading: false,
-                    notesError: null,
-                    showNewNoteForm: false,
-                    isEditing: null,
-                    editingNoteId: -1,
-                },
-            },
-        });
-        toast("Created new note.", "success");
-        resetNoteFormInput();
-    } catch (error) {
-        notesDispatch({
-            action: {
-                type: "SET_NOTES_ERROR",
-                payload: {
-                    showNewNoteForm: false,
-                    isEditing: null,
-                    editingNoteId: -1,
-                    notesLoading: false,
-                    notesError:
-                        "Could not create a new note. Please try again later.",
-                },
-            },
-        });
-        toast(
-            "Failed to create new note. please try again later.",
-            "error"
-        );
+    
     }
 
 
     const {noteTitle, noteBody} = noteItem
-    const pinIcon = pinned ? <PushPin/> : <PushPinOutlined />
     const submitButtonValue = isEditing ? "Edit Note" : "Add Note";
 
-    return (
+    return showNewNoteForm ? (
         <div className="new-note-container flex-col flex-align-center flex-justify-center p-2">
             <form
                 onSubmit={handleAddNotes}
                 className="new-note-form note-card flex-col flex-align-start flex-justify-between p-1"
+                style={noteCardStyle}
             >
                 <button
                     type="button"
@@ -239,10 +268,54 @@ const NewNoteModal = () => {
 						tabIndex="5"
 					/>
 				</div>
-                { formDataError && <p className="text-lg error-color mt-1-5 mx-auto">{formDataError}</p>}
+                {formDataError && (
+					<p className="text-lg error-color mt-1-5 mx-auto">
+						{formDataError}
+					</p>
+				)}
+				<div className="note-actions flex-row flex-justify-center flex-align-center flex-wrap">
+					<div className="note-action-wrapper">
+						<button
+							type="button"
+							className="btn btn-icon btn-note-action"
+							onClick={() => handleChangeOptions("colorPalette")}
+						>
+							<span className="icon mui-icon icon-edit">
+								{<Palette />}
+							</span>
+						</button>
+						{showColorPalette && (
+							<ColorPalette
+								handleChangeNoteBackgroundColor={
+									handleNoteItemChange
+								}
+								noteBackgroundColor={
+									noteItem.noteBackgroundColor
+								}
+							/>
+						)}
+					</div>
+					<select
+						name="notePriority"
+						value={noteItem.notePriority}
+						onChange={handleNoteItemChange}
+                        className="priority-dropdown px-0-5 py-0-25 text-sm"
+					>
+						{
+                            notePriorities.map(({ priorityId, priority }) => (
+                                <option
+                                    value={priority}
+                                    key={priorityId}
+                                >
+                                    {priority}
+                                </option>
+                            ))
+                        }
+					</select>
+				</div>
             </form>
         </div>
-    )
+    ) : null;
 }
 
 export {NewNoteModal}
